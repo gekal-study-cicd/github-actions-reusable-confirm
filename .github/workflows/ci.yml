@@ -1,0 +1,35 @@
+name: CI Workflow
+
+on:
+  pull_request:
+    types:
+      [ opened, edited ]
+  push:
+    branches:
+      - main
+
+jobs:
+  info:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Print github event name
+        run: |
+          echo "The github event name is: ${{ github.event_name }}"
+
+  build:
+    needs: [ info ]
+    uses: gekal-study-cicd/github-actions-reusable-templates/.github/workflows/demo-reusable-build.yml@main
+    with:
+      github-event-name: pull_request
+      build-args: "--build"
+    secrets:
+      token: ${{ secrets.GITHUB_TOKEN }}
+
+  deploy:
+    needs: [ build ]
+    uses: gekal-study-cicd/github-actions-reusable-templates/.github/workflows/demo-reusable-deploy.yml@main
+    with:
+      deploy-args: "--deploy"
+      github-event-name: push
+    secrets:
+      token: ${{ secrets.GITHUB_TOKEN }}
